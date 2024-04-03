@@ -67,21 +67,20 @@ for i, (ax, data_column, color) in enumerate(zip(axs, [data_first_second_column,
     for yr, group in zip(year.unique(), [group for _, group in data_column.groupby(year)]):
         group_x = group.iloc[:, 0]
         group_y = group.iloc[:, i + 1]
-        z = np.polyfit(group_x, group_y, 1)
-        p = np.poly1d(z)
-        slope, intercept, r_value, _, _ = stats.linregress(group_x, group_y)
-        slopes.append(z[0])
+        slope, intercept, r_value, std_err, _ = stats.linregress(group_x, group_y)
         square_r_values.append(r_value ** 2)
+        slopes.append(slope)
 
     # Calculating the average slope
     average_slope = np.mean(slopes)
     average_square_r = np.mean(square_r_values)
+    average_std_err = np.mean(std_err)
 
     plot_and_regression(ax, x, y, title, color, 'black')
-    ax.text(0.05, 0.95, f'OPUS = {average_slope:.2f} cm/yr\nR(squared) = {average_square_r*100:.2f}%', transform=ax.transAxes, fontsize=10, verticalalignment='top')
+    ax.text(0.05, 0.95, f'OPUS = {average_slope:.2f} ± {average_std_err:.2f} cm/yr\nR(squared) = {average_square_r*100:.2f}%', transform=ax.transAxes, fontsize=10, verticalalignment='top')
 
 
-
+    
     # Set x-axis limits to start from the minimum value of x
     if i == 0:
 
@@ -113,36 +112,21 @@ for i, (ax, data_column, color) in enumerate(zip(axs, [data_first_second_column,
     for yr, group in zip(year.unique(), [group for _, group in data_second.groupby(year)]):
         group_x = group.iloc[:, 0]
         group_y = group.iloc[:, i + 1]  # Corrected to use 'i' as the index for the y-values
-        slope, _, r_value, _, _ = stats.linregress(group_x, group_y)
+        slope, _, r_value, std_err, _ = stats.linregress(group_x, group_y)
         slopes_data_second.append(slope)
         r_values_data_second.append(r_value)
 
     # Calculate the average slope and average R-value for data_second
     avg_slope_data_second = np.mean(slopes_data_second)
     avg_r_value_data_second = np.mean(r_values_data_second)
+    average_std_err = np.mean(std_err)
 
     # Add text to subplot displaying the average slope and average R-value for data_second
-    ax.text(0.25, 0.05, f'PPP: {avg_slope_data_second:.2f} cm/yr\nR-value: {avg_r_value_data_second*100:.2f}%', transform=ax.transAxes, fontsize=10, verticalalignment='bottom', horizontalalignment='right')
+    ax.text(0.25, 0.05, f'PPP: {avg_slope_data_second:.2f} ± {average_std_err:.2f} cm/yr\nR-value: {avg_r_value_data_second*100:.2f}%', transform=ax.transAxes, fontsize=10, verticalalignment='bottom', horizontalalignment='right')
 
 
 
-# Initialize lists to store slopes and square R values for each column
-slopes_data_second = []
-square_r_values_data_second = []
 
-# Extract the x values (first column) for data_second
-x_data_second = data_second.iloc[:, 0]
-
-# Loop through the second, third, and fourth columns
-for i in range(1, 4):  # Start from index 1 since index 0 is the x-axis column
-    y_data_second = data_second.iloc[:, i]  # Extract y values for the current column
-    
-    # Perform linear regression
-    slope, intercept, r_value, _, _ = stats.linregress(x_data_second, y_data_second)
-    
-    # Append slope and square R value to respective lists
-    slopes_data_second.append(slope)
-    square_r_values_data_second.append(r_value ** 2)
 
 
 # Overlay data from the second dataframe onto the existing subplots
