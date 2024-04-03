@@ -71,17 +71,19 @@ for i, (ax, data_column) in enumerate(zip(axs, [data_second_column, data_third_c
         group_y = group.iloc[:, i + 1]
         z = np.polyfit(group_x, group_y, 1)
         p = np.poly1d(z)
-        slope, intercept, r_value, _, _ = stats.linregress(group_x, group_y)
+        slope, intercept, r_value, std_err, _ = stats.linregress(group_x, group_y)
         slopes.append(z[0])
         square_r_values.append(r_value ** 2)
     
     # Calculating the average slope
+    std_err *= 1.96
     average_slope = np.mean(slopes)
     average_square_r = np.mean(square_r_values)
+    average_std_err = np.mean(std_err)
     
 
     plot_and_regression(ax, x, y, title)
-    ax.text(0.05, 0.95, f'Displacement = {average_slope:.2f} cm/yr\nR(squared) = {average_square_r*100:.2f}%', transform=ax.transAxes, fontsize=10, verticalalignment='top')
+    ax.text(0.05, 0.95, f'Displacement = {average_slope:.2f} ± {average_std_err:.2f} cm/yr\nR(squared) = {average_square_r*100:.2f}%', transform=ax.transAxes, fontsize=10, verticalalignment='top')
 
     # Set x-axis limits to start from the minimum value of x
     min_x = min(x)
@@ -105,6 +107,6 @@ for i, (ax, data_column) in enumerate(zip(axs, [data_second_column, data_third_c
 # Show and save plot as PDF
 plt.tight_layout(pad=3.0)
 # Set the figure size (width, height) in inches
-plt.gcf().set_size_inches(width, height)
+
 plt.savefig(file_path+ ".png")
 plt.show()
