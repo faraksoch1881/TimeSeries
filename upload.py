@@ -17,6 +17,7 @@ from selenium.webdriver.support import expected_conditions as EC
 from tkinter import *
 from tkinter import messagebox
 from tkinter import filedialog
+from selenium.common.exceptions import TimeoutException
  
 root = tk.Tk()
 frame = tk.Frame(root)
@@ -78,16 +79,30 @@ def upload_to_opus(getdir,file):
     upload1 = driver.find_element(By.NAME,'uploadfile')
     upload1.send_keys('%s' % (str(getdir) + "/" + str(file)))  # send_keys
     #select antenna type
-    wait = WebDriverWait(driver, 15)
+    #wait = WebDriverWait(driver, 15)
     # wait.until(EC.element_to_be_clickable((By.XPATH, '//span[@class="select2-selection__arrow"]'))).click()
 
     upload5 = driver.find_element(By.NAME,'Static')
     upload5.click()
 
-    WebDriverWait(driver, 300, 1).until(EC.text_to_be_present_in_element((By.XPATH,'//*'),"Upload successful!"))
-    print(file + " is uploaded successfully")
-    os.remove(getdir+os.sep+file)
+
+    try:
+        WebDriverWait(driver, 5).until(EC.text_to_be_present_in_element((By.XPATH,'//*'),"Upload successful!"))
+        print(file + " is uploaded successfully")
+        os.remove(getdir+os.sep+file)
+        
+    except TimeoutException as ex:
+        os.remove(getdir+os.sep+file)
+        print(file + " error uploading files"+str(ex))
+        pass
     driver.back()
+
+    
+
+
+    
+
+    #driver.back()
 
     # ##select method
     # all_antenna_options = wait.until(EC.presence_of_all_elements_located((By.XPATH, '//li[@class="select2-results__option"]')))
